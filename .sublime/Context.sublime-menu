@@ -1,0 +1,25 @@
+[
+  {
+    "id": "CPS",
+    "caption": "CPS testt",
+    "children": [
+      {
+        "caption": "Testt Comments Creater 【注释插入】",
+        "children": [
+          {
+            "caption": "配置",
+            "command": "edit_settings",
+            "args": {
+              "base_file": "${packages}/testt_comments_creater/.sublime/testt.sublime-settings",
+              "default": "{\n  //请在 'comments_creater_options' 选项内添加自定义配置 \n}"
+            }
+          },
+          {
+            "caption": "重新加载",
+            "command": "testt_comments_creator_reload"
+          }
+        ]
+      }
+    ]
+  }
+]
