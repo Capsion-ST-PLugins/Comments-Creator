@@ -24,7 +24,7 @@ from .core import utils
 from .core import comments_creator
 
 DEBUG = 1
-PLUGIN_NAME = __package__
+PLUGIN_NAME = 'cps_comments_creator'
 DEFAULT_SETTINGS = "cps.sublime-settings"
 SETTINGS = {}
 FOLDER_LIST = None
@@ -36,7 +36,7 @@ def log(*args):
 def get_floder_list() -> dict:
     return {
         'user_path':os.path.join(sublime.packages_path(),'User'),
-        'default_settings':os.path.join(sublime.packages_path(), PLUGIN_NAME, '.sublime', DEFAULT_SETTINGS),
+        'default_settings':os.path.join(sublime.packages_path(), __package__, '.sublime', DEFAULT_SETTINGS),
         'user_settings':os.path.join(sublime.packages_path(),'User', DEFAULT_SETTINGS),
     }
 
