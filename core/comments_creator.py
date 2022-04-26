@@ -12,6 +12,20 @@
 import re
 import typing
 
+DEBUG = 0
+def log(*args):
+    if DEBUG:print(*args)
+
+if ( __name__ == "__main__"):
+    from reg_python import python_reg
+    log("python_reg: ", python_reg['checkType'].keys())
+    from reg_js import js_reg
+
+else:
+    from .reg_python import python_reg
+    from .reg_js import js_reg
+
+
 class ParamsParser():
     def __init__(self, reg_obj):
         self.line_str = ""
@@ -34,10 +48,17 @@ class ParamsParser():
         return self.output_str
 
     # 提供旧的注释数据，提取内部对应的注释说明
-    def set_old_comments(self, comments_str:str):
-        ree = re.compile('\n')
-        self.old_comment_list = ree.split(comments_str)
+    def set_old_comments(self, old_comments:str):
+        self.old_comment_list = re.compile('\n').split(old_comments)
+
+        # for index in range(len(self.old_comment_list)):
+        #     log(f'{index}. {self.old_comment_list[index]}')
+        # log('\n')
+
         self.old_comment["description"] = self.extract_description('description')
+        # log("self.old_comment['description']: ", self.old_comment["description"])
+        # log('\n')
+
         return self
 
     # 获取函数说明
@@ -54,7 +75,6 @@ class ParamsParser():
 
     # 从旧注释块内，提取对应关键字的说明文档，关键字是相应的参数名称
     def extract_description(self, key_word:str) -> str:
-        description = "{description}"
         key_word = key_word.lower()
 
         # 设置空格作为分隔符
@@ -66,27 +86,32 @@ class ParamsParser():
             if len(res)==0 or not res: continue
 
             for index, _each in enumerate(res):
+
                 # 字段必须包含 description
                 if _each.lower().find(key_word) > -1:
-                    # print("res: ", res)
-                    # print(f'当前查找： [{key_word}] =>> [{_each}] => [{res[-1]}]')
+                    # log("res: ", res)
+                    # log(f'当前查找： [{key_word}] =>> [{_each}] => [{res[-1]}]\n')
 
                     # 获取最后一段当作注释内容
-                    return ''.join(res[-1])
+                    old_description = ''.join(res[-1])
+                    log("old_description: ", old_description)
+                    return old_description
 
-        return description
+        # 没有识别到则返回一个模板
+        return "{description}"
 
     # 主函数，根据提供的正则匹配当前输入的字符串是否符合，
     def match_line(self, line_str:str) -> bool:
         self.line_str = line_str
 
-        res = None
-
         # 更新新格式判断当前行是什么类型 对象|参数|函数
         if 'checkType' in self.reg_obj:
             res = self.check_line_type(line_str)
+            log("----------------- res: ", res)
 
-            if not 'result' in res:return False
+            if not res or not 'result' in res:
+                log('错误~~~~~~~~~~~~~~~~~')
+                return False
 
             # 匹配成功，提取出结果
             result = res['result']
@@ -159,7 +184,13 @@ class ParamsParser():
         ```
 
         """
-        if not 'checkType' in self.reg_obj: return {}
+
+        for each in self.reg_obj['checkType'].keys():
+            log('each: ', each)
+
+        if not 'checkType' in self.reg_obj:
+            log('没有发现 checkType')
+            return {}
 
         for key in self.reg_obj['checkType'].keys():
             reg_list:list = self.reg_obj['checkType'][key]
@@ -200,8 +231,9 @@ class ParamsParser():
 
         if 'params_obj' in self.result:
             # 将数据渲染到注释模板中
-            # for each in self.result['params_obj']:
-            #     print(each)
+            for each in self.result['params_obj']:
+                log(each)
+
             params = self.comment_params(self.result['params_obj'], self.syntax_tmpl['comments_contexts']['param'], params_alignment)
 
             # 合并所有内容
@@ -373,14 +405,6 @@ class ParamsParser():
                 break
         return result
 
-if ( __name__ == "__main__"):
-    from reg_pathon import python_reg
-    from reg_js import js_reg
-
-else:
-    from .reg_pathon import python_reg
-    from .reg_js import js_reg
-
 class Python(ParamsParser):
     def __init__(self):
         super(Python, self).__init__(python_reg)
@@ -417,11 +441,6 @@ class JavaScript(ParamsParser):
             ]
         }
 
-
-# def test():
-#     pass
-
-
 PARSER={
     'python':Python,
     'vue':JavaScript,
@@ -430,6 +449,7 @@ PARSER={
     'py':Python,
     'default':JavaScript
 }
+
 
 if ( __name__ == "__main__"):
     syntax_tmpl={
@@ -447,7 +467,7 @@ if ( __name__ == "__main__"):
     }
 
     old_comment = '''    /**
-     *  @Description 读取file格式
+     *  @Description 读取file格式123123
      *
      *  @param {params} e     {description}
      *  @param {file} file  file格式的文件对象
@@ -459,9 +479,7 @@ if ( __name__ == "__main__"):
     # test_str = "class Win32(object):"
     # test_str = "def debug(value='5', set=True):"
     test_str = "    def insert_alignment(self, param_list:list=[], indent:str='STR') -> list:"
-
-
-    syntax = 'python'
+    syntax = 'py'
 
     test = PARSER[syntax]()
     test.match_line(test_str)

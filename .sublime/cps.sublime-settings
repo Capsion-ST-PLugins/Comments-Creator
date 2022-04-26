@@ -1,0 +1,75 @@
+{
+  "name": "tett 插件",
+  "author": "CPS",
+  "mail": "373704015@qq.com", //本插件任何问题请联系qq
+
+  // prettier-ignore
+  "cps_comments_creater": {
+    // 全局默认配置
+    "max_search_count":80,       // 搜索行数（正数从上向下查找， 负数反之）
+    "params_alignment":"  ",     // [indent<string>] 是否对齐参数
+    "comments_direction":"up",   // "down"|"up" 函数名字上一行，函数名字下一行
+    "default_tmpl":{
+      "comments_contexts":{
+        "Description":true,
+        "param":":param {type} {name} {description}",
+        "returns":":returns {type} {description}",
+      }
+    },
+
+    /* 根据后缀名设置 */
+    "py": { 
+      "comments_direction": "down",
+      "comments_contexts":{
+        "Description":"@Description {description}\n",
+        "param":"- param {name} :{type} {description}",
+        "returns":"\n@returns `{type}` {description}"
+      },
+      "comments_header": [
+        "    \"\"\"",      // 注释区的开始标识
+        "    ",            // 内容位置的前缀
+        "    \"\"\"",      // 注释区的结束
+      ]
+    },
+
+    "js":{ 
+      "comments_contexts":{
+        "Description":"@Description - {description}\n",
+        "param":"@param {type} {name}  - {description}",
+        "returns":"\n@returns {type} - {description}"
+      },
+      "comments_header": [
+        "/**",        //    /**
+        " * ",        //     * 内容位置的前缀
+        " */"         //     */
+      ]
+    },
+
+    "ts":{
+      "comments_contexts":{
+        "Description":"@Description - {description}\n",
+        "param":"@param {type} {name}  - {description}",
+        "returns":"\n@returns {type} - {description}"
+      },
+      "comments_header": [
+        "/**",        // /**
+        " * ",        //  * 内容位置的前缀
+        " */"         //  */
+      ]
+    },
+
+    "vue":{ 
+      "comments_contexts":{
+        "Description":" @Description {description}\n",
+        "param":" @param {type} {name}  {description}",
+        "returns":"\n @returns {type} {description}"
+      },
+      "comments_header": [
+        "/**",      // /**
+        " * ",      //  * @Description:
+        " */"       //  */
+      ]
+    }
+  }
+  // prettier-ignore
+}

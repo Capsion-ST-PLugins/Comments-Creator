@@ -1,6 +1,6 @@
 [
   {
     "keys": ["alt+q"],
-    "command": "testt_comments_creator"
+    "command": "cps_comments_creator"
   }
 ]

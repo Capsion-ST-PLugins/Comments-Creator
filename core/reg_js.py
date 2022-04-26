@@ -139,7 +139,7 @@ js_reg = {
 
     "checkType":{
         "func":func_reg,
-        # "param":params_reg,
+        "param":params_reg,
         # "class":class_reg,
     },
 
