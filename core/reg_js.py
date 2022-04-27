@@ -31,9 +31,7 @@ def create_reg_obj(reg, res_len:int, name:int, type:int=-1, context:int=-1 ) -> 
         "params":5, # 参数的数量
         "indent":0  # 缩进数量
     }
-
     ```
-
     """
     if res_len <= 1:
         raise Exception("res_len 参数必须大于1，返回的结果需要二元tuple进行处理")
@@ -48,29 +46,6 @@ def create_reg_obj(reg, res_len:int, name:int, type:int=-1, context:int=-1 ) -> 
     if type != -1:res['type'] = type
 
     return res
-
-def extract(params_list:list, reg_obj:list) -> list:
-    result:list = []
-    i = 0
-
-    for index, each_param in enumerate(params_list):
-        for reg_index, each_reg in enumerate(reg_obj):
-            res = each_reg["reg"].findall(each_param)
-            if not res or len(res) == 0: continue
-            i+=1
-            # print(f'{index+1} 表达式{reg_index+1}:\t{each_param}\t>>>\t{res} [{len(res[0])}]')
-            print(f'{index+1} 表达式{reg_index+1} {res[0][each_reg["name"]]}\t>>>\t 函数类型: [{res[0][each_reg["return_type"]] if "return_type" in each_reg else ""}]\t 函数参数:[{res[0][each_reg["params"]]}]')
-
-            params_list[index] = ""
-
-            result.append({
-                "id":index,
-                 "type":res[0][each_reg['type']] if 'type' in each_reg else "",
-                 "name":res[0][each_reg['name']],
-                 "context":res[0][each_reg['context']] if 'context' in each_reg else ""
-            })
-            break
-    return result
 
 
 int_reg = [
@@ -94,7 +69,7 @@ params_reg = [
 ]
 
 func_reg = [
-    {
+    {   # export const ifDirExists = async (filePath="") => { 处理有括号的
         "reg":re.compile(r'^(\s+)?(export\s)?(const\s|var\s|let\s)(\w+\s?)\=\s?(async\s?)?\((.*)\)\s?\:?(.*)?\s?\=>\s?\{?'),
         "res_len":7,
         "name":3, # 函数名
@@ -102,6 +77,16 @@ func_reg = [
         "params":5,
         "indent":0
     },
+
+    {   # export const ifDirExists = async filePath => { 处理无括号的
+        "reg":re.compile(r'^(\s+)?(export\s)?(const\s|var\s|let\s)(\w+\s?)\=\s?(async\s?)?(.*)\s?\:?(.*)?\s?\=>\s?\{?'),
+        "res_len":7,
+        "name":3, # 函数名
+        "return_type":6, # 返回的类型
+        "params":5,
+        "indent":0
+    },
+
     {
         "reg":re.compile(r'^(\s+)?(exports\.)(\w+)\s?\=\s?(async\s)?(function)\s?\((.*)?\)\s?\:?\s?(\w+)?\s?\{'),
         "res_len":7,
@@ -147,23 +132,92 @@ js_reg = {
         "string":str_reg,
         "number":int_reg,
         "params":params_reg, # 无类型参数
+    },
+
+    'except':{
+        "param":[]
     }
 }
 
+def test_func(params_list:list, reg_obj:list) -> list:
+    """
+    @Description 测试函数
+
+    - param params_list :{list} {description}
+    - param reg_obj     :{list} {description}
+
+    @returns `{list}` {description}
+
+    """
+    result:list = []
+    i = 0
+
+    for index, each_param in enumerate(params_list):
+        for reg_index, each_reg in enumerate(reg_obj):
+            res = each_reg["reg"].findall(each_param)
+            if not res or len(res) == 0:
+                print(f'【第{index}行】: ', each_param)
+                continue
+            else:
+                i += 1
+                params_list[index] = ""
+
+                ret = { "id":index }
+                for each in each_reg.keys():
+                    if each in ['reg', 'res_len']:
+                        continue
+                    ret[each] = res[0][each_reg[each]]
+
+                result.append(ret)
+                print(f"【第{index}行】: ", ret)
+            break
+
+    return result
+
+def test_params(params_list:list, reg_obj:list) -> list:
+
+    result:list = []
+    i = 0
+
+    for index, each_param in enumerate(params_list):
+
+        for reg_index, each_reg in enumerate(reg_obj):
+
+            res = each_reg["reg"].findall(each_param)
+
+            if not res or len(res) == 0: continue
+
+            i+=1
+            # print(f'{index+1} 表达式{reg_index+1}:\t{each_param}\t>>>\t{res} [{len(res[0])}]')
+            # print(f'{index+1} 表达式{reg_index+1} {res[0][each_reg["name"]]}\t>>>\t 函数类型: [{res[0][each_reg["return_type"]] if "return_type" in each_reg else ""}]\t 函数参数:[{res[0][each_reg["params"]]}]')
+
+            params_list[index] = ""
+            result.append({
+                "id":index,
+                 "type":res[0][each_reg['type']] if 'type' in each_reg else "",
+                 "name":res[0][each_reg['name']],
+                 "context":res[0][each_reg['context']] if 'context' in each_reg else ""
+            })
 
 
+            break
 
+    for each in result:
+        print(each)
+
+    return result
 
 
 if ( __name__ == "__main__"):
     # 测试用参数字符串
-    int_test = [
+    param_list = [
         # 整数
         r'int_param = 555',
         r"int_param:number",
         r"int_param:number = -5566",
         r'int_param: number=-111111',
         r'int_param : number = 0',
+        r'time = 1000',
 
         # 字符串
         r'str_param=""',
@@ -216,7 +270,10 @@ export async function function_name(data,ccvb){}
     async function_name(e, name) {
     function_name(e, name) {
 function function_name(path):ccvb{}
-tmp_img.onload = () => {"""
+tmp_img.onload = () => {
+export const delay = (time = 1000) =>
+"""
+    func_list = [each for each in func_str.split('\n') if each !=""]
 
     # from test import extract
     # extract(int_test, int_reg)
@@ -226,5 +283,6 @@ tmp_img.onload = () => {"""
     # res = python_reg['func']['reg'].findall(func_str[0])
 
 
-    func_list = [each for each in func_str.split('\n') if each !=""]
-    extract(func_list, func_reg)
+
+    test_func(func_list, func_reg)
+    # test_params(param_list, int_reg)

@@ -129,6 +129,54 @@ python_reg = {
     }
 }
 
+def test(params_list:list, reg_obj:list) -> list:
+    # print("reg_obj: ", reg_obj)
+    # print("params_list: ", params_list)
+
+
+    """
+    @Description 测试函数
+
+    - param params_list :{list} {description}
+    - param reg_obj     :{list} {description}
+
+    returns `{list}` {description}
+
+    """
+    result:list = []
+    i = 0
+
+    for index, each_param in enumerate(params_list):
+        # print("each_param: ", each_param)
+        for reg_index, each_reg in enumerate(reg_obj):
+            res = each_reg["reg"].findall(each_param)
+            if not res or len(res) == 0: continue
+            i+=1
+            # print(f'{index+1} 表达式{reg_index+1}:\t{each_param}\t>>>\t{res} [{len(res[0])}]')
+            # print(f'{index+1} 表达式{reg_index+1} {res[0][each_reg["name"]]}\t>>>\t 函数类型: [{res[0][each_reg["return_type"]] if "return_type" in each_reg else ""}]\t 函数参数:[{res[0][each_reg["params"]]}]')
+
+            params_list[index] = ""
+
+            # type
+            t=""
+            if 'type' in each_reg:
+                if isinstance(each_reg['type'],str):
+                    t = each_reg['type']
+                elif isinstance(each_reg['type'],int):
+                    t = res[0][each_reg['type']]
+
+            res = {
+                "id":index,
+                 "type":t,
+                 "name":res[0][each_reg['name']],
+                 "context":res[0][each_reg['context']] if 'context' in each_reg else ""
+            }
+
+            result.append(res)
+            print("res: ", res)
+            break
+
+    return result
 
 if ( __name__ == "__main__"):
 
@@ -189,54 +237,7 @@ def check_data(self, data, fix=True, tip=True):"""
     func_list = [ each for each in func_str.split('\n') if each !="" ]
 
 
-    def test(params_list:list, reg_obj:list) -> list:
-        # print("reg_obj: ", reg_obj)
-        # print("params_list: ", params_list)
 
-
-        """
-        @Description 测试函数
-
-        - param params_list :{list} {description}
-        - param reg_obj     :{list} {description}
-
-        returns `{list}` {description}
-
-        """
-        result:list = []
-        i = 0
-
-        for index, each_param in enumerate(params_list):
-            # print("each_param: ", each_param)
-            for reg_index, each_reg in enumerate(reg_obj):
-                res = each_reg["reg"].findall(each_param)
-                if not res or len(res) == 0: continue
-                i+=1
-                # print(f'{index+1} 表达式{reg_index+1}:\t{each_param}\t>>>\t{res} [{len(res[0])}]')
-                # print(f'{index+1} 表达式{reg_index+1} {res[0][each_reg["name"]]}\t>>>\t 函数类型: [{res[0][each_reg["return_type"]] if "return_type" in each_reg else ""}]\t 函数参数:[{res[0][each_reg["params"]]}]')
-
-                params_list[index] = ""
-
-                # type
-                t=""
-                if 'type' in each_reg:
-                    if isinstance(each_reg['type'],str):
-                        t = each_reg['type']
-                    elif isinstance(each_reg['type'],int):
-                        t = res[0][each_reg['type']]
-
-                res = {
-                    "id":index,
-                     "type":t,
-                     "name":res[0][each_reg['name']],
-                     "context":res[0][each_reg['context']] if 'context' in each_reg else ""
-                }
-
-                result.append(res)
-                print("res: ", res)
-                break
-
-        return result
 
     # test(params_list, int_reg)
     # test(params_list, bool_reg)
@@ -246,4 +247,4 @@ def check_data(self, data, fix=True, tip=True):"""
     # test(params_list, params_reg)
     # res = python_reg['func']['reg'].findall(func_str[0])
 
-    test(func_list, func_reg)
+    test_func(func_list, func_reg)

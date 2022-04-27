@@ -12,7 +12,7 @@
 import re
 import typing
 
-DEBUG = 0
+DEBUG = 1
 def log(*args):
     if DEBUG:print(*args)
 
@@ -182,9 +182,7 @@ class ParamsParser():
         }
 
         ```
-
         """
-
         for each in self.reg_obj['checkType'].keys():
             log('each: ', each)
 
@@ -446,6 +444,8 @@ PARSER={
     'vue':JavaScript,
     'javascript':JavaScript,
     'js':JavaScript,
+    'cjs':JavaScript,
+    'mjs':JavaScript,
     'py':Python,
     'default':JavaScript
 }
@@ -481,7 +481,7 @@ if ( __name__ == "__main__"):
     test_str = "    def insert_alignment(self, param_list:list=[], indent:str='STR') -> list:"
     syntax = 'py'
 
-    test = PARSER[syntax]()
+    test = Parser[syntax]()
     test.match_line(test_str)
     test.set_old_comments(old_comment).format(syntax_tmpl)
 
