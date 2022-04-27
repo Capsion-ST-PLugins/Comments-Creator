@@ -4,7 +4,7 @@
   "mail": "373704015@qq.com", //本插件任何问题请联系qq
 
   // prettier-ignore
-  "cps_comments_creater": {
+  "cps_comments_creator": {
     // 全局默认配置
     "max_search_count":80,       // 搜索行数（正数从上向下查找， 负数反之）
     "params_alignment":"  ",     // [indent<string>] 是否对齐参数
