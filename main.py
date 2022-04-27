@@ -23,7 +23,7 @@ if int(sublime.version()) < 3176:
 from .core import utils
 from .core import comments_creator
 
-DEBUG = 1
+DEBUG = 0
 PLUGIN_NAME = 'cps_comments_creator'
 DEFAULT_SETTINGS = "cps.sublime-settings"
 SETTINGS = {}
@@ -109,7 +109,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         # 为了处理带多个.的文件名，使用切片反方向获取
         name, syntax = os.path.basename(view.file_name()).split('.')[-2:]
         if not syntax or not syntax in comments_creator.PARSER:
-            return log('CpsCommentsCreatorCommand:: >>> 不支持的语法{}'.format(syntax))
+            return log('{}:: >>> 不支持的语法{}'.format(PLUGIN_NAME, syntax))
 
         # 实例化解释对象
         parser = comments_creator.PARSER[syntax]()
@@ -126,7 +126,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         # log('currt_str: ', view.substr(curt_line))
 
         # 定义新注释的插入位置
-        insert_direction:str = syntax_tmpl.get('comments_direction', 'down') or options.get('comments_direction', 'up')
+        insert_direction:str = syntax_tmpl.get('comments_direction', None) or options.get('comments_direction')
         if insert_direction == 'down':
             insert_position = curt_line
         else:
