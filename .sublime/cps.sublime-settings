@@ -45,6 +45,19 @@
       ]
     },
 
+    "mjs":{
+      "comments_contexts":{
+        "Description":"@Description - {description}\n",
+        "param":"@param {type} {name}  - {description}",
+        "returns":"\n@returns {type} - {description}"
+      },
+      "comments_header": [
+        "/**",        //    /**
+        " * ",        //     * 内容位置的前缀
+        " */"         //     */
+      ]
+    },
+
     "ts":{
       "comments_contexts":{
         "Description":"@Description - {description}\n",
