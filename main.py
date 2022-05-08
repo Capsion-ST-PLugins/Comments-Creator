@@ -94,7 +94,7 @@ class CpsCommentsCreatorEditSettingCommand(sublime_plugin.TextCommand):
 
         sublime.active_window().run_command('edit_settings', {
                 "base_file": f'{FOLDER_LIST["default_settings"]}',
-                "default": "{\n  //请在 'comments_creater_options' 选项内添加自定义配置 \n}"
+                "default": '{\n  "comments_creater_options":{\n    /*请在插件名称内选项内添加自定义配置*/\n    \n  }\n}'
             })
 
 class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):

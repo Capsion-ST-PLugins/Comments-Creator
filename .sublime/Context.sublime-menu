@@ -1,21 +1,15 @@
 [
   {
-    "id": "CPS",
-    "caption": "CPS testt",
+    "id":"cps-settings",
+    "caption": "Capsion-Comments-Creator",
     "children": [
-      {
-        "caption": "Testt Comments Creater 【注释插入】",
-        "children": [
-          {
-            "caption": "配置",
-            "command": "cps_comments_creator_edit_setting",
-          },
-          {
-            "caption": "重新加载",
-            "command": "cps_comments_creator_reload"
-          }
-        ]
-      }
-    ]
-  }
+    {
+      "caption": "Comments-Creator",
+      "command": "cps_comments_creator_edit_setting",
+    }]
+  },
+  {
+    "caption": "Capsion-Comments-Creator",
+    "command": "cps_comments_creator",
+  },
 ]
