@@ -2,6 +2,10 @@
 
 自用的注释模板注入插件，原理是采用正则匹配，当前不知道有ast语法树的时候写的，也没时间重构，就边用边更新了。
 
+注意: 插件市场有专业的功能相似的插件，我只是单纯为了自己用的爽菜写的😁，才不是因为它配置太复杂才自己造轮子，请有需要的朋友请使用专业插件。
+
+
+
 <div>
     <img flex="left" src="https://img.shields.io/badge/python-%3E%3D3.8.0-3776AB"/>
     <img flex="left" src="https://img.shields.io/badge/Sublime%20Text-FF9800?style=flat&logo=Sublime%20Text&logoColor=white"/>
