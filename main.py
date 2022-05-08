@@ -161,15 +161,16 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
     def search_old_comments(self, line_region:sublime.Region, comment_begin:str, comment_end:str, search_direction:str='up') -> sublime.Region:
         """
         @Description 给定一行范围，从该行，向下或者向上开始查找是否存在旧的注释块
-
-        - param line_region         :{sublime.Region} 开始查找的行
+        
+        - param line_region         :{sublime.Region} 开始查找的行                          
         - param comment_begin       :{str}            注释块的开始标识，（py：三个"或者三个'）|（js：/**）等
-        - param comment_end         :{str}            注释块的结束标识，（py：三个"或者三个'）|（js：*/）等
-        - param search_direction=up :{str}            'down'|'up'查找的方向
-
-        @returns `{sublime.Region}` (start:int，end:int1)
-
+        - param comment_end         :{str}            注释块的结束标识，（py：三个"或者三个'）|（js：*/）等 
+        - param search_direction=up :{str}            'down'|'up'查找的方向                
+        
+        @returns `{ sublime.Region}` (start:int，end:int1)
+        
         """
+
         begin = comment_begin.strip()
         end = comment_end.strip()
 
