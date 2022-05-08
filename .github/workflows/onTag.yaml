@@ -1,0 +1,36 @@
+name: Release
+
+env:
+  PACKAGE_NAME: "cps-comments-creator.sublime-package"
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: msg
+      run: echo 'PACKAGE_NAME -> ${{env.PACKAGE_NAME}}'
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Zip The File
+      uses: thedoctor0/zip-release@master
+      with:
+        type: 'zip'
+        filename: ${{env.PACKAGE_NAME}}
+        exclusions: '*.git* /*node_modules/* .editorconfig .github/ .gitignore/ .git/ *.gif'
+
+    - name: ls
+      run: ls -al
+
+    - name: Upload the gihub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        token: ${{ secrets.TOKEN }}
+        files: |
+          ${{env.PACKAGE_NAME}}
