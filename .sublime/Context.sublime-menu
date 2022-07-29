@@ -1,15 +1,23 @@
 [
   {
-    "id":"cps-settings",
-    "caption": "Capsion-Comments-Creator",
+    "id":"cps-plugins",
+    "caption": "CPS-Plugins",
     "children": [
-    {
-      "caption": "Comments-Creator",
-      "command": "cps_comments_creator_edit_setting",
-    }]
+      {
+        "id":"cps-plugins",
+        "caption": "Comments-Creator",
+        "children": [
+          {
+            "caption": "Comments-Creator",
+            "command": "cps_comments_creator",
+          },
+          {
+            "caption": "Comments-Creator-settings",
+            "command": "cps_comments_creator_edit_setting",
+          }
+        ]
+      },
+    ]
   },
-  {
-    "caption": "Capsion-Comments-Creator",
-    "command": "cps_comments_creator",
-  },
+
 ]
