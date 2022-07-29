@@ -10,7 +10,7 @@
 # @Description: 功能描述
 #
 
-from typing import Optional
+from typing import Optional, Tuple, Union, NewType
 import sublime
 import sublime_plugin
 import os
@@ -24,11 +24,13 @@ from .core import utils
 from .core import comments_creator
 from .core import helper
 
-DEBUG = 1
+DEBUG = 0
 PLUGIN_NAME = "cps_comments_creator"
 DEFAULT_SETTINGS = "cps.sublime-settings"
 SETTINGS = {}
 FOLDER_LIST = None
+
+resLineTuple = NewType("tuple(curt_line:Region, match_str:str)", tuple)
 
 
 def log(*args):
@@ -96,7 +98,7 @@ def plugin_loaded():
 class CpsCommentsCreatorReloadCommand(sublime_plugin.TextCommand):
     def run(self, edit) -> None:
         reload(comments_creator)
-        log(f"comments_creator reloaded")
+        print(f"comments_creator reloaded")
 
 
 class CpsCommentsCreatorEditSettingCommand(sublime_plugin.TextCommand):
@@ -129,19 +131,88 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         if not syntax or not syntax in comments_creator.PARSER:
             return log("{}:: >>> 不支持的语法{}".format(PLUGIN_NAME, syntax))
 
-        # 实例化解释对象
-        parser = comments_creator.PARSER[syntax]()
-
         # 默认模板兜底，使用用户模版更新
         syntax_tmpl = options["default_tmpl"]
         if syntax in options:
             utils.recursive_update(syntax_tmpl, options[syntax])
 
         # 需要查找的字符串，整行进行匹配
+        curt_line_region, match_str = self.get_currt_line_str()
+
+        # 定义新注释的插入方向
+        # py 是下方
+        # js之类的是上方
+        insert_direction: str = syntax_tmpl.get(
+            "comments_direction", None
+        ) or options.get("comments_direction")
+
+        if insert_direction == "down":
+            insert_position = curt_line_region
+            indent_offset = 1
+        else:
+            insert_position = self.get_pre_line_region(curt_line_region)
+            indent_offset = 0
+
+        # 查找是否有旧的注释块块
+        comments_begin: str = syntax_tmpl["comments_header"][0]  # 注释块的头部标识
+        comments_end: str = syntax_tmpl["comments_header"][-1]  # 注释快的尾部标识
+
+        old_comments = self.search_old_comments(
+            curt_line_region,
+            comments_begin,
+            comments_end,
+            search_direction=insert_direction,
+        )
+
+        log("old_comments: ", old_comments)
+
+        # 匹配当前行
+        # 实例化解释对象
+        parser = comments_creator.PARSER[syntax]()
+        if parser.match_line(match_str):
+            # 如果存在旧的注释，尝试提取旧注释（旧注释内不能带空格，空格之后会被忽略）
+            if old_comments:
+                parser.set_old_comments(view.substr(old_comments))
+
+            # 更新数据到注释模版内
+            parser.format(syntax_tmpl)
+
+            if old_comments:
+                view.replace(edit, old_comments, parser.output_str)
+            else:
+                view.insert(edit, insert_position.b, parser.output_str)
+        else:
+            # 获取当前缩进的个数
+            translate_tabs_to_spaces = view.settings().get("tab_size")
+            if translate_tabs_to_spaces:
+                indent = " "
+            else:
+                indent = "\t"
+
+            indent_str = indent * translate_tabs_to_spaces
+            if indent_offset:
+                indent_str += indent * translate_tabs_to_spaces
+
+            comments_begin = indent_str + comments_begin + "\n"
+            comments_str = indent_str + syntax_tmpl["comments_header"][1] + "\n"
+            comments_end = indent_str + comments_end + "\n"
+
+            output_str = "".join([comments_begin, comments_str, comments_end])
+
+            view.insert(edit, insert_position.b, output_str)
+
+    def get_currt_line_str(self) -> resLineTuple:
+        """
+        返回要查找的行的具体信息
+
+        @returns `{curt_line:Region}` 查找行的选区
+        @returns `{match_str:str}` 要查找行的文本内容（完整）
+
+        """
+        view = self.view
         if helper.has_selection(self.view):
             currt_region = helper.get_currt_region_full_lines(self.view)
             currt_region_content = view.substr(currt_region)
-            match_str = helper.merge_line(currt_region_content)
 
             # 根据最下方的坐标，获取注释最终插入的位置
             # 选择多行的情况下，无法正确的识别最后一行的位置
@@ -152,46 +223,13 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
                 else currt_region.b - 1
             )
             curt_line = view.full_line(currt_cursor)
+            match_str = helper.merge_line(currt_region_content)
         else:
-            curt_line = view.full_line(view.sel()[0].a)
+            currt_cursor = view.sel()[0].a
+            curt_line = view.full_line(currt_cursor)
             match_str = view.substr(curt_line)
 
-        # 定义新注释的插入方向
-        # py 是下方
-        # js之类的是上方
-        insert_direction: str = syntax_tmpl.get(
-            "comments_direction", None
-        ) or options.get("comments_direction")
-
-        if insert_direction == "down":
-            insert_position = curt_line
-        else:
-            insert_position = self.get_pre_line_region(curt_line)
-
-        # 查找是否有旧的注释块块
-        comments_begin: str = syntax_tmpl["comments_header"][0]  # 注释块的头部标识
-        comments_end: str = syntax_tmpl["comments_header"][-1]  # 注释快的尾部标识
-
-        old_comments = self.search_old_comments(
-            curt_line, comments_begin, comments_end, search_direction=insert_direction
-        )
-
-        print("old_comments: ", old_comments)
-
-        # 匹配当前行
-        if parser.match_line(match_str):
-            # 如果存在旧的注释，尝试提取旧注释（旧注释内不能带空格，空格之后会被忽略）
-            if old_comments:
-                parser.set_old_comments(view.substr(old_comments))
-
-            # 更新数据到注释模版内
-            # parser.format_by_tmpl(syntax_tmpl)
-            parser.format(syntax_tmpl)
-
-            if old_comments:
-                view.replace(edit, old_comments, parser.output_str)
-            else:
-                view.insert(edit, insert_position.b, parser.output_str)
+        return (curt_line, match_str)
 
     # 获取现有注释模块的内容
     def search_old_comments(
@@ -202,7 +240,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         search_direction: str = "up",
     ) -> sublime.Region:
         """
-        @Description 给定一行范围，从该行，向下或者向上开始查找是否存在旧的注释块
+        给定一行范围，从该行，向下或者向上开始查找是否存在旧的注释块
 
         - param line_region         :{sublime.Region} 开始查找的行
         - param comment_begin       :{str}            注释块的开始标识，（py：三个"或者三个'）|（js：/**）等
@@ -214,12 +252,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         """
 
         begin = comment_begin.strip()
-        print("begin: ", begin)
-        print("begin: ", len(begin))
         end = comment_end.strip()
-
-        print("search_direction: ", search_direction)
-        print("line_region: ", self.view.substr(line_region))
 
         # 根据查找方向，给定开始查找的行
         if search_direction == "down":
@@ -228,13 +261,11 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         else:
             # 获取前一行的位置
             find_region = self.get_pre_line_region(line_region)
-        print("find_region: ", find_region)
 
         # 查找注释头标识： begin
         find_begin = self.find_str_by_line_region(
             find_region, begin, max_search_count=1, direction=search_direction
         )
-        print("find_begin: ", find_begin)
 
         if not find_begin:
             return False

@@ -339,7 +339,6 @@ class ParamsParser:
 
         returns `{list}` {description}
         ```json
-        //
         [
             {"id": 0, "type": "param", "name": "value", "context": ""},
             {"id": 1, "type": "param", "name": "xxxxx", "context": ""},
