@@ -10,7 +10,6 @@
 # @Description: 功能描述
 #
 import re
-import typing
 
 DEBUG = 0
 
@@ -516,4 +515,4 @@ if __name__ == "__main__":
     test.match_line(test_str)
     test.set_old_comments(old_comment).format(syntax_tmpl)
 
-    print(test)
+    log(test)

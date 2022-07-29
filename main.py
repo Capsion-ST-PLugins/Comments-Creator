@@ -154,7 +154,9 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
 
         # log("match_str: ", match_str)
 
-        # 定义新注释的插入位置
+        # 定义新注释的插入方向
+        # py 是下方
+        # js之类的是上方
         insert_direction: str = syntax_tmpl.get(
             "comments_direction", None
         ) or options.get("comments_direction")
@@ -171,6 +173,8 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         old_comments = self.search_old_comments(
             curt_line, comments_begin, comments_end, search_direction=insert_direction
         )
+
+        print("old_comments: ", old_comments)
 
         # 匹配当前行
         if parser.match_line(match_str):
