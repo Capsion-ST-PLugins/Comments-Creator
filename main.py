@@ -181,25 +181,25 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
                 view.replace(edit, old_comments, parser.output_str)
             else:
                 view.insert(edit, insert_position.b, parser.output_str)
-        else:
-            # 获取当前缩进的个数
-            translate_tabs_to_spaces = view.settings().get("tab_size")
-            if translate_tabs_to_spaces:
-                indent = " "
-            else:
-                indent = "\t"
+        # else:
+        #     # 获取当前缩进的个数
+        #     translate_tabs_to_spaces = view.settings().get("tab_size")
+        #     if translate_tabs_to_spaces:
+        #         indent = " "
+        #     else:
+        #         indent = "\t"
 
-            indent_str = indent * translate_tabs_to_spaces
-            if indent_offset:
-                indent_str += indent * translate_tabs_to_spaces
+        #     indent_str = indent * translate_tabs_to_spaces
+        #     if indent_offset:
+        #         indent_str += indent * translate_tabs_to_spaces
 
-            comments_begin = indent_str + comments_begin + "\n"
-            comments_str = indent_str + syntax_tmpl["comments_header"][1] + "\n"
-            comments_end = indent_str + comments_end + "\n"
+        #     comments_begin = indent_str + comments_begin + "\n"
+        #     comments_str = indent_str + syntax_tmpl["comments_header"][1] + "\n"
+        #     comments_end = indent_str + comments_end + "\n"
 
-            output_str = "".join([comments_begin, comments_str, comments_end])
+        #     output_str = "".join([comments_begin, comments_str, comments_end])
 
-            view.insert(edit, insert_position.b, output_str)
+        #     view.insert(edit, insert_position.b, output_str)
 
     def get_currt_line_str(self) -> resLineTuple:
         """
