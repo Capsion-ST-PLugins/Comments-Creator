@@ -24,7 +24,7 @@ from .core import utils
 from .core import comments_creator
 from .core import helper
 
-DEBUG = 0
+DEBUG = 1
 PLUGIN_NAME = "cps_comments_creator"
 DEFAULT_SETTINGS = "cps.sublime-settings"
 SETTINGS = {}
@@ -144,15 +144,17 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
             match_str = helper.merge_line(currt_region_content)
 
             # 根据最下方的坐标，获取注释最终插入的位置
+            # 选择多行的情况下，无法正确的识别最后一行的位置
+            # -1 确保多行中，最后一行位置的正确识别
             currt_cursor = (
-                currt_region.a if currt_region.a > currt_region.b else currt_region.b
+                currt_region.a
+                if currt_region.a > currt_region.b
+                else currt_region.b - 1
             )
             curt_line = view.full_line(currt_cursor)
         else:
             curt_line = view.full_line(view.sel()[0].a)
             match_str = view.substr(curt_line)
-
-        # log("match_str: ", match_str)
 
         # 定义新注释的插入方向
         # py 是下方
@@ -212,7 +214,12 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         """
 
         begin = comment_begin.strip()
+        print("begin: ", begin)
+        print("begin: ", len(begin))
         end = comment_end.strip()
+
+        print("search_direction: ", search_direction)
+        print("line_region: ", self.view.substr(line_region))
 
         # 根据查找方向，给定开始查找的行
         if search_direction == "down":
@@ -221,11 +228,14 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         else:
             # 获取前一行的位置
             find_region = self.get_pre_line_region(line_region)
+        print("find_region: ", find_region)
 
         # 查找注释头标识： begin
         find_begin = self.find_str_by_line_region(
             find_region, begin, max_search_count=1, direction=search_direction
         )
+        print("find_begin: ", find_begin)
+
         if not find_begin:
             return False
 
@@ -261,7 +271,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         search_count = 1
         while search_count <= max_search_count:
             currt_str = view.substr(line_region).strip()
-            # log('查找： ', currt_str)
+            log("查找： ", currt_str)
 
             if currt_str.find(find_str) == 0:
                 # log('找到： ', find_str, '>>>>> 返回 ', line_region)

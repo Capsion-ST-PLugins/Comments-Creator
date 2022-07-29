@@ -8,12 +8,16 @@
         "caption": "Comments-Creator",
         "children": [
           {
-            "caption": "Comments-Creator",
-            "command": "cps_comments_creator",
+            "caption": "settings",
+            "command": "cps_comments_creator_edit_setting",
           },
           {
-            "caption": "Comments-Creator-settings",
-            "command": "cps_comments_creator_edit_setting",
+            "caption": "reload",
+            "command": "cps_comments_creator_reload",
+          },
+          {
+            "caption": "Comments-Creator",
+            "command": "cps_comments_creator",
           }
         ]
       },
