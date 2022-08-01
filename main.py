@@ -137,7 +137,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
             utils.recursive_update(syntax_tmpl, options[syntax])
 
         # 需要查找的字符串，整行进行匹配
-        curt_line_region, match_str = self.get_currt_line_str()
+        curt_region, match_str = self.get_currt_line_str()
 
         # 定义新注释的插入方向
         # py 是下方
@@ -147,10 +147,10 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         ) or options.get("comments_direction")
 
         if insert_direction == "down":
-            insert_position = curt_line_region
+            insert_position = curt_region
             indent_offset = 1
         else:
-            insert_position = self.get_pre_line_region(curt_line_region)
+            insert_position = self.get_pre_line_region(curt_region)
             indent_offset = 0
 
         # 查找是否有旧的注释块块
@@ -158,7 +158,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         comments_end: str = syntax_tmpl["comments_header"][-1]  # 注释快的尾部标识
 
         old_comments = self.search_old_comments(
-            curt_line_region,
+            curt_region,
             comments_begin,
             comments_end,
             search_direction=insert_direction,
@@ -209,9 +209,9 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         @returns `{match_str:str}` 要查找行的文本内容（完整）
 
         """
-        view = self.view
-        if helper.has_selection(self.view):
-            currt_region = helper.get_currt_region_full_lines(self.view)
+        view = view
+        if helper.has_selection(view):
+            currt_region = helper.get_currt_region_full_lines(view)
             currt_region_content = view.substr(currt_region)
 
             # 根据最下方的坐标，获取注释最终插入的位置
