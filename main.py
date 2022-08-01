@@ -209,7 +209,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         @returns `{match_str:str}` 要查找行的文本内容（完整）
 
         """
-        view = view
+        view = self.view
         if helper.has_selection(view):
             currt_region = helper.get_currt_region_full_lines(view)
             currt_region_content = view.substr(currt_region)
