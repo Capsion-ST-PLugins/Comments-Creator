@@ -30,7 +30,7 @@ DEFAULT_SETTINGS = "cps.sublime-settings"
 SETTINGS = {}
 FOLDER_LIST = None
 
-resLineTuple = NewType("tuple(curt_line:Region, match_str:str)", tuple)
+resLineTuple = NewType("tuple(currt_line:Region, currt_contents:str)", tuple)
 
 
 def log(*args):
@@ -137,7 +137,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
             utils.recursive_update(syntax_tmpl, options[syntax])
 
         # 需要查找的字符串，整行进行匹配
-        curt_region, match_str = self.get_currt_line_str()
+        currt_region, currt_line_contents = self.get_currt_line_str()
 
         # 定义新注释的插入方向
         # py 是下方
@@ -147,10 +147,10 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         ) or options.get("comments_direction")
 
         if insert_direction == "down":
-            insert_position = curt_region
+            insert_position = currt_region
             indent_offset = 1
         else:
-            insert_position = self.get_pre_line_region(curt_region)
+            insert_position = self.get_pre_line_region(currt_region)
             indent_offset = 0
 
         # 查找是否有旧的注释块块
@@ -158,18 +158,18 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         comments_end: str = syntax_tmpl["comments_header"][-1]  # 注释快的尾部标识
 
         old_comments = self.search_old_comments(
-            curt_region,
+            currt_region,
             comments_begin,
             comments_end,
             search_direction=insert_direction,
         )
 
-        log("old_comments: ", old_comments)
+        # log("old_comments: ", old_comments)
 
         # 匹配当前行
         # 实例化解释对象
         parser = comments_creator.PARSER[syntax]()
-        if parser.match_line(match_str):
+        if parser.match_line(currt_line_contents):
             # 如果存在旧的注释，尝试提取旧注释（旧注释内不能带空格，空格之后会被忽略）
             if old_comments:
                 parser.set_old_comments(view.substr(old_comments))
@@ -181,32 +181,24 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
                 view.replace(edit, old_comments, parser.output_str)
             else:
                 view.insert(edit, insert_position.b, parser.output_str)
-        # else:
-        #     # 获取当前缩进的个数
-        #     translate_tabs_to_spaces = view.settings().get("tab_size")
-        #     if translate_tabs_to_spaces:
-        #         indent = " "
-        #     else:
-        #         indent = "\t"
+        else:
 
-        #     indent_str = indent * translate_tabs_to_spaces
-        #     if indent_offset:
-        #         indent_str += indent * translate_tabs_to_spaces
+            # 获取当前缩进类型
+            currt_str = currt_line_contents
+            indent = " " if view.settings().get("tab_size", None) else "\t"
+            indent = (len(currt_str) - len(currt_str.lstrip())) * indent
+            comments_str = "".join(
+                [f"{indent}{line}\n" for line in syntax_tmpl["comments_header"]]
+            )
 
-        #     comments_begin = indent_str + comments_begin + "\n"
-        #     comments_str = indent_str + syntax_tmpl["comments_header"][1] + "\n"
-        #     comments_end = indent_str + comments_end + "\n"
-
-        #     output_str = "".join([comments_begin, comments_str, comments_end])
-
-        #     view.insert(edit, insert_position.b, output_str)
+            view.insert(edit, currt_region.a, comments_str.replace("\n\n", "\n"))
 
     def get_currt_line_str(self) -> resLineTuple:
         """
         返回要查找的行的具体信息
 
-        @returns `{curt_line:Region}` 查找行的选区
-        @returns `{match_str:str}` 要查找行的文本内容（完整）
+        @returns `{currt_region:Region}` 查找行的选区
+        @returns `{currt_contents:str}` 要查找行的文本内容（完整）
 
         """
         view = self.view
@@ -222,14 +214,14 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
                 if currt_region.a > currt_region.b
                 else currt_region.b - 1
             )
-            curt_line = view.full_line(currt_cursor)
-            match_str = helper.merge_line(currt_region_content)
+            currt_region = view.full_line(currt_cursor)
+            currt_contents = helper.merge_line(currt_region_content)
         else:
             currt_cursor = view.sel()[0].a
-            curt_line = view.full_line(currt_cursor)
-            match_str = view.substr(curt_line)
+            currt_region = view.full_line(currt_cursor)
+            currt_contents = view.substr(currt_region)
 
-        return (curt_line, match_str)
+        return (currt_region, currt_contents)
 
     # 获取现有注释模块的内容
     def search_old_comments(

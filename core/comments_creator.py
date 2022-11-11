@@ -435,6 +435,9 @@ class ParamsParser:
                 break
         return result
 
+    def insert_default_comments(self):
+        return self.syntax_tmpl["comments_header"]
+
 
 class Python(ParamsParser):
     def __init__(self):

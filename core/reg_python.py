@@ -103,7 +103,7 @@ func_reg = [
     {
         # "reg":re.compile(r'^(\s*)?(class|def)\s*?(\w+)\((.*)\)\s*?(\->)?\s*?(\w+\.\w+|\w+)?\s*?\:'),
         "reg": re.compile(
-            r"^(\s*)?(async def|def)\s+(\w+)\(\s*?(.*)\s*?\)\s*?(\->)?\s*?([a-zA-Z\.->\s\[\]\$]+)?\s*?\:"
+            r"^(\s*)?(async def|def)\s+(\w+)\(\s*?(.*)\s*?\)\s*?(\->)?\s*?([a-zA-Z\.->\s\[\]\$\|]+)?\s*?\:"
         ),
         "res_len": 6,
         "name": 2,
@@ -209,6 +209,7 @@ def extract(params_list:list, reg_obj:list) -> list:
 def check_data(self, data, fix=True, tip=True):
     def find_str_by_line_region(self, line_region:sublime.Region, find_str:str, max_search_count:int=1, direction:str='up') -> Optional[str]:
 async def test(item: Any):
+    def get_window_info(hwnd: T.Hwnd) -> T.HwndInfo | None:
 """
 
     func_list = [each for each in func_str.split("\n") if each != ""]
