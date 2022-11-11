@@ -210,6 +210,7 @@ def check_data(self, data, fix=True, tip=True):
     def find_str_by_line_region(self, line_region:sublime.Region, find_str:str, max_search_count:int=1, direction:str='up') -> Optional[str]:
 async def test(item: Any):
     def get_window_info(hwnd: T.Hwnd) -> T.HwndInfo | None:
+    def find_sub_window_ex( parent_hwnd: T.Hwnd, class_name: str = None, window_text: str = None ) -> T.HwndInfo | None:
 """
 
     func_list = [each for each in func_str.split("\n") if each != ""]
