@@ -4,7 +4,6 @@
     "caption": "CPS-Plugins",
     "children": [
       {
-        "id":"cps-plugins",
         "caption": "Comments-Creator",
         "children": [
           {

@@ -147,10 +147,10 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         ) or options.get("comments_direction")
 
         if insert_direction == "down":
-            insert_position = currt_region
+            insert_position = currt_region.b
             indent_offset = 1
         else:
-            insert_position = self.get_pre_line_region(currt_region)
+            insert_position = self.get_pre_line_region(currt_region).b
             indent_offset = 0
 
         # 查找是否有旧的注释块块
@@ -176,11 +176,12 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
 
             # 更新数据到注释模版内
             parser.format(syntax_tmpl)
+            print("parser.output_str: ", parser.output_str)
 
             if old_comments:
                 view.replace(edit, old_comments, parser.output_str)
             else:
-                view.insert(edit, insert_position.b, parser.output_str)
+                view.insert(edit, insert_position, parser.output_str)
         else:
 
             # 获取当前缩进类型
@@ -191,7 +192,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
                 [f"{indent}{line}\n" for line in syntax_tmpl["comments_header"]]
             )
 
-            view.insert(edit, currt_region.a, comments_str.replace("\n\n", "\n"))
+            view.insert(edit, currt_region.a, comments_str)
 
     def get_currt_line_str(self) -> resLineTuple:
         """
