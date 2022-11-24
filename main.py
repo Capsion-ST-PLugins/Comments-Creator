@@ -10,7 +10,7 @@
 # @Description: 功能描述
 #
 
-from typing import Optional, Tuple, Union, NewType
+from typing import Optional, NewType
 import sublime
 import sublime_plugin
 import os
@@ -24,97 +24,22 @@ from .core import utils
 from .core import comments_creator
 from .core import helper
 
-DEBUG = 0
-PLUGIN_NAME = "cps_comments_creator"
-DEFAULT_SETTINGS = "cps.sublime-settings"
+SETTING_FILE = "cps.sublime-settings"
+SETTING_KEY = "comments_creator"
 SETTINGS = {}
-FOLDER_LIST = None
 
 resLineTuple = NewType("tuple(currt_line:Region, currt_contents:str)", tuple)
 
 
-def log(*args):
-    global DEBUG
-    if DEBUG:
-        print(*args)
-
-
-def get_floder_list() -> dict:
-    return {
-        "user_path": os.path.join(sublime.packages_path(), "User"),
-        "default_settings": os.path.join(
-            sublime.packages_path(), __package__, ".sublime", DEFAULT_SETTINGS
-        ),
-        "user_settings": os.path.join(
-            sublime.packages_path(), "User", DEFAULT_SETTINGS
-        ),
-    }
-
-
 def plugin_loaded():
-    global FOLDER_LIST
-    FOLDER_LIST = get_floder_list()
-    reload(comments_creator)
-
-    print(f"{PLUGIN_NAME} on loaded")
-
-    def plugin_loaded_async():
-        """
-        @Description 监听用户配置文件
-        """
-        global SETTINGS, FOLDER_LIST
-        if not FOLDER_LIST:
-            return
-
-        with open(FOLDER_LIST["default_settings"], "r", encoding="utf8") as f:
-            SETTINGS = sublime.decode_value(f.read()).get(PLUGIN_NAME, {})
-            if len(list(SETTINGS.keys())) == 0:
-                raise Exception(
-                    "读取配置失败 ~~~ 请确保一下文件真实存在： ", FOLDER_LIST["default_settings"]
-                )
-            # log('读取settings: ', SETTINGS.keys())
-
-        user_settings = sublime.load_settings(DEFAULT_SETTINGS)
-        utils.recursive_update(SETTINGS, user_settings.to_dict()[PLUGIN_NAME])
-        user_settings.add_on_change(DEFAULT_SETTINGS, _on_settings_change)
-
-    def _on_settings_change() -> None:
-        global SETTINGS
-
-        tmp = sublime.load_settings(DEFAULT_SETTINGS).get(PLUGIN_NAME, False)
-
-        if not tmp or not isinstance(tmp, dict):
-            return
-
-        utils.recursive_update(SETTINGS, tmp)
-
-        log(f"{DEFAULT_SETTINGS} 触发更新。")
-        return
-
-    # 在另一个进程执行该函数( 这样不会阻塞窗口的初始化，造成载入文件卡顿 )
-    sublime.set_timeout_async(plugin_loaded_async)
+    global SETTING_FILE, SETTING_KEY, SETTINGS
+    SETTINGS = sublime.load_settings(SETTING_FILE).get(SETTING_KEY, {})
 
 
 class CpsCommentsCreatorReloadCommand(sublime_plugin.TextCommand):
-    def run(self, edit) -> None:
+    def run(self, edit: sublime.Edit) -> None:
         reload(comments_creator)
-        print(f"comments_creator reloaded")
-
-
-class CpsCommentsCreatorEditSettingCommand(sublime_plugin.TextCommand):
-    def run(self, edit: sublime.Edit):
-        global FOLDER_LIST
-
-        if not FOLDER_LIST:
-            return
-
-        sublime.active_window().run_command(
-            "edit_settings",
-            {
-                "base_file": f'{FOLDER_LIST["default_settings"]}',
-                "default": '{\n  "comments_creater_options":{\n    /*请在插件名称内选项内添加自定义配置*/\n    \n  }\n}',
-            },
-        )
+        print(f"{__package__} reloaded")
 
 
 class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
@@ -127,9 +52,9 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
 
         # 根据文件后缀名，配置对应的解析函数
         # 为了处理带多个.的文件名，使用切片反方向获取
-        name, syntax = os.path.basename(view.file_name()).split(".")[-2:]
+        _, syntax = os.path.basename(view.file_name()).split(".")[-2:]
         if not syntax or not syntax in comments_creator.PARSER:
-            return log("{}:: >>> 不支持的语法{}".format(PLUGIN_NAME, syntax))
+            return print("{}:: >>> 不支持的语法{}".format(__package__, syntax))
 
         # 默认模板兜底，使用用户模版更新
         syntax_tmpl = options["default_tmpl"]
@@ -148,10 +73,8 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
 
         if insert_direction == "down":
             insert_position = currt_region.b
-            indent_offset = 1
         else:
             insert_position = self.get_pre_line_region(currt_region).b
-            indent_offset = 0
 
         # 查找是否有旧的注释块块
         comments_begin: str = syntax_tmpl["comments_header"][0]  # 注释块的头部标识
@@ -164,8 +87,6 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
             search_direction=insert_direction,
         )
 
-        # log("old_comments: ", old_comments)
-
         # 匹配当前行
         # 实例化解释对象
         parser = comments_creator.PARSER[syntax]()
@@ -176,13 +97,12 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
 
             # 更新数据到注释模版内
             parser.format(syntax_tmpl)
-            print("parser.output_str: ", parser.output_str)
-
             if old_comments:
                 view.replace(edit, old_comments, parser.output_str)
             else:
                 view.insert(edit, insert_position, parser.output_str)
         else:
+            # 无法识别时，插入通用格式
 
             # 获取当前缩进类型
             currt_str = currt_line_contents
@@ -196,10 +116,9 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
 
     def get_currt_line_str(self) -> resLineTuple:
         """
-        返回要查找的行的具体信息
+        @Description 返回要查找的行的具体信息，要查找行的文本内容（完整）
 
-        @returns `{currt_region:Region}` 查找行的选区
-        @returns `{currt_contents:str}` 要查找行的文本内容（完整）
+        @returns `{ resLineTuple}` {description}
 
         """
         view = self.view
@@ -233,7 +152,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         search_direction: str = "up",
     ) -> sublime.Region:
         """
-        给定一行范围，从该行，向下或者向上开始查找是否存在旧的注释块
+        @Description 给定一行范围，从该行，向下或者向上开始查找是否存在旧的注释块
 
         - param line_region         :{sublime.Region} 开始查找的行
         - param comment_begin       :{str}            注释块的开始标识，（py：三个"或者三个'）|（js：/**）等
@@ -268,7 +187,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         find_end = self.find_str_by_line_region(
             find_region, end, max_search_count=30, direction="down"
         )
-        # log("find_end: ", find_end)
+
         if not find_end:
             return False
 
@@ -295,10 +214,8 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         search_count = 1
         while search_count <= max_search_count:
             currt_str = view.substr(line_region).strip()
-            log("查找： ", currt_str)
 
             if currt_str.find(find_str) == 0:
-                # log('找到： ', find_str, '>>>>> 返回 ', line_region)
                 # 返回当前行尾
                 return line_region
             else:

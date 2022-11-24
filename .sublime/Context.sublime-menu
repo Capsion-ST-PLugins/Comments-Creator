@@ -5,20 +5,7 @@
     "children": [
       {
         "caption": "Comments-Creator",
-        "children": [
-          {
-            "caption": "settings",
-            "command": "cps_comments_creator_edit_setting",
-          },
-          {
-            "caption": "reload",
-            "command": "cps_comments_creator_reload",
-          },
-          {
-            "caption": "Comments-Creator",
-            "command": "cps_comments_creator",
-          }
-        ]
+        "command": "cps_comments_creator",
       },
     ]
   },
