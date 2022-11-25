@@ -33,7 +33,53 @@ resLineTuple = NewType("tuple(currt_line:Region, currt_contents:str)", tuple)
 
 def plugin_loaded():
     global SETTING_FILE, SETTING_KEY, SETTINGS
-    SETTINGS = sublime.load_settings(SETTING_FILE).get(SETTING_KEY, {})
+
+    SETTINGS = SettingManager(SETTING_KEY, SETTING_FILE)
+
+
+class SettingManager:
+    def __init__(self, setting_key: str, default_settings: str):
+        self.setting_key = setting_key
+        self.default_settings = default_settings
+        self.default_settings_path = os.path.join(
+            sublime.packages_path(), "cps-plugins", ".sublime", default_settings
+        )
+
+        self.data = {}
+
+        sublime.set_timeout_async(self.plugin_loaded_async)
+
+    def __getitem__(self, key: str, default={}):
+        if key in self.data:
+            return self.data.get(key, default)
+        else:
+            return {}
+
+    def get(self, key: str, default={}):
+        return self.__getitem__(key, default)
+
+    def plugin_loaded_async(self):
+        """
+        @Description 监听用户配置文件
+        """
+        with open(self.default_settings_path, "r", encoding="utf8") as f:
+            self.data = sublime.decode_value(f.read()).get(self.setting_key, {})
+
+        # 读取现有配置
+        user_settings = sublime.load_settings(self.default_settings)
+        # 添加配置更新事件
+        user_settings.add_on_change(self.default_settings, self._on_settings_change)
+        # 将最新的配置更新到内部的data，最终以data为准
+        utils.recursive_update(self.data, user_settings.to_dict()[self.setting_key])
+
+    def _on_settings_change(self):
+        new_settings = sublime.load_settings(self.default_settings).get(
+            self.setting_key, {}
+        )
+
+        utils.recursive_update(self.data, new_settings)
+
+        return self
 
 
 class CpsCommentsCreatorReloadCommand(sublime_plugin.TextCommand):
@@ -57,7 +103,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
             return print("{}:: >>> 不支持的语法{}".format(__package__, syntax))
 
         # 默认模板兜底，使用用户模版更新
-        syntax_tmpl = options["default_tmpl"]
+        syntax_tmpl = options.get("default_tmpl", {})
         if syntax in options:
             utils.recursive_update(syntax_tmpl, options[syntax])
 
