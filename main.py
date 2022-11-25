@@ -104,7 +104,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
 
         # 默认模板兜底，使用用户模版更新
         syntax_tmpl = options.get("default_tmpl", {})
-        if syntax in options:
+        if syntax in options.data:
             utils.recursive_update(syntax_tmpl, options[syntax])
 
         # 需要查找的字符串，整行进行匹配
