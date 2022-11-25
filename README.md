@@ -4,14 +4,11 @@
 
 注意: 插件市场有专业的功能相似的插件，我只是单纯为了自己用的爽菜写的😁，才不是因为它配置太复杂才自己造轮子，请有需要的朋友请使用专业插件。
 
-
-
 <div>
     <img flex="left" src="https://img.shields.io/badge/python-%3E%3D3.8.0-3776AB"/>
     <img flex="left" src="https://img.shields.io/badge/Sublime%20Text-FF9800?style=flat&logo=Sublime%20Text&logoColor=white"/>
     <img flex="left" src="https://img.shields.io/github/license/caoxiemeihao/electron-vite-vue?style=flat"/>
 </div>
-
 [English](README.en.md) | 简体中文
 
 
@@ -22,13 +19,17 @@
 
 ## **创建注释块**
 
-![step1](screenshot/step1.gif)
+![setp1](screenshot/setp1.gif)
+
+![step1](http://localhost:45462/image/step1.gif)
 
 
 
 ## **更新注释块**
 
-![step2](screenshot/step2.gif)
+![setp2](screenshot/setp2.gif)
+
+![step2](http://localhost:45462/image/step2.gif)
 
 
 
