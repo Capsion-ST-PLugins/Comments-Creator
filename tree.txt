@@ -1,0 +1,30 @@
+DIR:cps_comments_creator                 # 
+   |-- .github/                          # 
+   |   |-- workflows/                    # 「workflows」
+   |   |   `-- onTag.yaml                # 
+   |-- .sublime/                         # 
+   |   |-- Default.sublime-keymap        # 
+   |   |-- Default.sublime-commands      # 
+   |   `-- Context.sublime-menu          # 
+   |-- core/                             # 「core」
+   |   |-- __pycache__/                  # 「__pycache__」
+   |   |   |-- test.cpython-39.pyc       # 
+   |   |   |-- test.cpython-37.pyc       # 
+   |   |   |-- reg_pathon.cpython-39.pyc # 
+   |   |   |-- reg_pathon.cpython-37.pyc # 
+   |   |   `-- reg_js.cpython-37.pyc     # 
+   |   |-- __init__.py                   # 
+   |   |-- utils.py                      # 
+   |   |-- test.py                       # 
+   |   |-- settings.py                   # 
+   |   |-- reg_python.py                 # 
+   |   |-- reg_js.py                     # 
+   |   |-- helper.py                     # 
+   |   `-- comments_creator.py           # 
+   |-- screenshot/                       # 「screenshot」
+   |   |-- step2.gif                     # 
+   |   `-- step1.gif                     # 
+   |-- README.md                         # 
+   |-- main.py                           # 
+   |-- .python-version                   # 
+   `-- .gitignore                        # 
