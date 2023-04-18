@@ -28,6 +28,14 @@ SETTING_FILE = "cps.sublime-settings"
 SETTING_KEY = "comments_creator"
 SETTINGS = {}
 
+DEFAULT_INSERT_DIRECTION = {
+    "mjs": "up",
+    "js": "up",
+    "ts": "up",
+    "cjs": "up",
+    "py": "down",
+}
+
 resLineTuple = NewType("tuple(currt_line:Region, currt_contents:str)", tuple)
 
 
@@ -113,9 +121,12 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         # 定义新注释的插入方向
         # py 是下方
         # js之类的是上方
-        insert_direction: str = syntax_tmpl.get(
-            "comments_direction", None
-        ) or options.get("comments_direction")
+        global DEFAULT_INSERT_DIRECTION
+        insert_direction: str = (
+            syntax_tmpl.get("comments_direction", None)
+            or DEFAULT_INSERT_DIRECTION.get(syntax, None)
+            or options.get("comments_direction")
+        )
 
         if insert_direction == "down":
             insert_position = currt_region.b
