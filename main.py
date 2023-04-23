@@ -115,19 +115,33 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         if syntax in options.data:
             utils.recursive_update(syntax_tmpl, options[syntax])
 
-        # 需要查找的字符串，整行进行匹配
-        currt_region, currt_line_contents = self.get_currt_line_str()
-
         # 定义新注释的插入方向
         # py 是下方
         # js之类的是上方
         global DEFAULT_INSERT_DIRECTION
+        print("syntax_tmpl: ", syntax_tmpl)
+
         insert_direction: str = (
-            syntax_tmpl.get("comments_direction", None)
-            or DEFAULT_INSERT_DIRECTION.get(syntax, None)
+            DEFAULT_INSERT_DIRECTION.get(syntax, None)
             or options.get("comments_direction")
+            or syntax_tmpl.get("comments_direction", None)
+        )
+        print("syntax: ", syntax)
+
+        print(
+            "DEFAULT_INSERT_DIRECTION.get(syntax, None): ",
+            DEFAULT_INSERT_DIRECTION.get(syntax, None),
+        )
+        print('options.get("comments_direction"): ', options.get("comments_direction"))
+        print(
+            'syntax_tmpl.get("comments_direction", None): ',
+            syntax_tmpl.get("comments_direction", None),
         )
 
+        print("insert_direction: ", insert_direction)
+
+        # 需要查找的字符串，整行进行匹配
+        currt_region, currt_line_contents = self.get_currt_line_str(insert_direction)
         if insert_direction == "down":
             insert_position = currt_region.b
         else:
@@ -171,9 +185,11 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
 
             view.insert(edit, currt_region.a, comments_str)
 
-    def get_currt_line_str(self) -> resLineTuple:
+    def get_currt_line_str(self, insert_direction: str) -> resLineTuple:
         """
         @Description 返回要查找的行的具体信息，要查找行的文本内容（完整）
+
+        - param insert_direction :{str} 插入的方向
 
         @returns `{ resLineTuple}` {description}
 
@@ -182,18 +198,24 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         if helper.has_selection(view):
             currt_region = helper.get_currt_region_full_lines(view)
             currt_region_content = view.substr(currt_region)
+            print("范围获取", (currt_region.a, currt_region.b))
 
             # 根据最下方的坐标，获取注释最终插入的位置
             # 选择多行的情况下，无法正确的识别最后一行的位置
             # -1 确保多行中，最后一行位置的正确识别
-            currt_cursor = (
-                currt_region.a
-                if currt_region.a > currt_region.b
-                else currt_region.b - 1
-            )
+            if insert_direction == "up":
+                currt_cursor = currt_region.a
+            else:
+                currt_cursor = (
+                    currt_region.a
+                    if currt_region.a > currt_region.b
+                    else currt_region.b - 1
+                )
             currt_region = view.full_line(currt_cursor)
             currt_contents = helper.merge_line(currt_region_content)
         else:
+            print("非范围获取")
+
             currt_cursor = view.sel()[0].a
             currt_region = view.full_line(currt_cursor)
             currt_contents = view.substr(currt_region)
