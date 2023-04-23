@@ -119,26 +119,24 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         # py 是下方
         # js之类的是上方
         global DEFAULT_INSERT_DIRECTION
-        print("syntax_tmpl: ", syntax_tmpl)
-
         insert_direction: str = (
             DEFAULT_INSERT_DIRECTION.get(syntax, None)
             or options.get("comments_direction")
             or syntax_tmpl.get("comments_direction", None)
         )
-        print("syntax: ", syntax)
+        # print("syntax: ", syntax)
 
-        print(
-            "DEFAULT_INSERT_DIRECTION.get(syntax, None): ",
-            DEFAULT_INSERT_DIRECTION.get(syntax, None),
-        )
-        print('options.get("comments_direction"): ', options.get("comments_direction"))
-        print(
-            'syntax_tmpl.get("comments_direction", None): ',
-            syntax_tmpl.get("comments_direction", None),
-        )
+        # print(
+        #     "DEFAULT_INSERT_DIRECTION.get(syntax, None): ",
+        #     DEFAULT_INSERT_DIRECTION.get(syntax, None),
+        # )
+        # print('options.get("comments_direction"): ', options.get("comments_direction"))
+        # print(
+        #     'syntax_tmpl.get("comments_direction", None): ',
+        #     syntax_tmpl.get("comments_direction", None),
+        # )
 
-        print("insert_direction: ", insert_direction)
+        # print("insert_direction: ", insert_direction)
 
         # 需要查找的字符串，整行进行匹配
         currt_region, currt_line_contents = self.get_currt_line_str(insert_direction)
@@ -198,7 +196,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         if helper.has_selection(view):
             currt_region = helper.get_currt_region_full_lines(view)
             currt_region_content = view.substr(currt_region)
-            print("范围获取", (currt_region.a, currt_region.b))
+            # print("范围获取", (currt_region.a, currt_region.b))
 
             # 根据最下方的坐标，获取注释最终插入的位置
             # 选择多行的情况下，无法正确的识别最后一行的位置
@@ -214,7 +212,7 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
             currt_region = view.full_line(currt_cursor)
             currt_contents = helper.merge_line(currt_region_content)
         else:
-            print("非范围获取")
+            # print("非范围获取")
 
             currt_cursor = view.sel()[0].a
             currt_region = view.full_line(currt_cursor)
