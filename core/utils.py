@@ -60,7 +60,7 @@ def is_js(filename):
 
 @args_to_lower
 def is_ts(filename):
-    for each in [".ts"]:
+    for each in [".ts", ".tsx", ".mts", ".cts"]:
         if filename.endswith(each):
             return True
 
@@ -115,7 +115,7 @@ def check_stynax(filename):
 
     res = sublime_syntax_check(filename)
 
-    return res if res else False
+    return res if res else ""
 
 
 def get_date_now(self, fmat):

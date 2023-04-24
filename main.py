@@ -34,6 +34,8 @@ DEFAULT_INSERT_DIRECTION = {
     "ts": "up",
     "cjs": "up",
     "py": "down",
+    "typescript": "up",
+    "javascript": "up",
 }
 
 resLineTuple = NewType("tuple(currt_line:Region, currt_contents:str)", tuple)
@@ -107,6 +109,13 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
         # 根据文件后缀名，配置对应的解析函数
         # 为了处理带多个.的文件名，使用切片反方向获取
         _, syntax = os.path.basename(view.file_name()).split(".")[-2:]
+
+        # syntax = utils.check_stynax(self.view.file_name()) or utils.check_stynax(
+        #     self.view.settings().get("syntax")
+        # )
+
+        print("syntax: ", syntax)
+
         if not syntax or not syntax in comments_creator.PARSER:
             return print("{}:: >>> 不支持的语法{}".format(__package__, syntax))
 
@@ -124,19 +133,19 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
             or options.get("comments_direction")
             or syntax_tmpl.get("comments_direction", None)
         )
-        # print("syntax: ", syntax)
+        print("syntax: ", syntax)
 
-        # print(
-        #     "DEFAULT_INSERT_DIRECTION.get(syntax, None): ",
-        #     DEFAULT_INSERT_DIRECTION.get(syntax, None),
-        # )
-        # print('options.get("comments_direction"): ', options.get("comments_direction"))
-        # print(
-        #     'syntax_tmpl.get("comments_direction", None): ',
-        #     syntax_tmpl.get("comments_direction", None),
-        # )
+        print(
+            "DEFAULT_INSERT_DIRECTION.get(syntax, None): ",
+            DEFAULT_INSERT_DIRECTION.get(syntax, None),
+        )
+        print('options.get("comments_direction"): ', options.get("comments_direction"))
+        print(
+            'syntax_tmpl.get("comments_direction", None): ',
+            syntax_tmpl.get("comments_direction", None),
+        )
 
-        # print("insert_direction: ", insert_direction)
+        print("insert_direction: ", insert_direction)
 
         # 需要查找的字符串，整行进行匹配
         currt_region, currt_line_contents = self.get_currt_line_str(insert_direction)
@@ -144,6 +153,8 @@ class CpsCommentsCreatorCommand(sublime_plugin.TextCommand):
             insert_position = currt_region.b
         else:
             insert_position = self.get_pre_line_region(currt_region).b
+
+        print("syntax_tmpl: ", syntax_tmpl)
 
         # 查找是否有旧的注释块块
         comments_begin: str = syntax_tmpl["comments_header"][0]  # 注释块的头部标识
